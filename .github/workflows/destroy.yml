@@ -15,7 +15,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.5   # 🔧 use the same version as your CD workflow
-
+      - name: Create dummy app.zip
+        working-directory: app
+        run: zip -r ../app.zip .
+        
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
