@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main   # 🔧 adjust if needed
+
+jobs:
+  ci-cd:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2. Setup Python for tests
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Install dependencies & run tests
+      - name: Install dependencies
+        working-directory: app
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        working-directory: app
+        run: pytest
+
+      # 4. Package Flask app into zip for Lambda
+      - name: Package app for Lambda
+        working-directory: app
+        run: zip -r ../app.zip . -x "tests/*" "*.pytest_cache*" "*.pyc"
+
+      # 5. Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5   # 🔧 keep consistent with destroy.yml
+
+      # 6. Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1   # 🔧 update if needed
+
+      # 7. Terraform Init & Apply
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve
+
+      # 8. Get API Gateway URL
+      - name: Show API Gateway URL
+        working-directory: terraform
+        run: terraform output api_url
