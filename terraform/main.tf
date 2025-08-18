@@ -6,7 +6,7 @@ terraform {
   backend "s3" {
     bucket         = "my-terraform-state-bucket"  
     key            = "flask-app/terraform.tfstate" 
-    region         = "eu-east-3"                  
+    region         = "eu-west-3"                  
     dynamodb_table = "terraform-locks"             
   }
 }
