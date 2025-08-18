@@ -46,7 +46,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1   # 🔧 update if needed
+          aws-region: ${{ secrets.AWS_REGION }}   #  update if needed
 
       # 7. Terraform Init & Apply
       - name: Terraform Init
