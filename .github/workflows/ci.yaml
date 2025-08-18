@@ -33,10 +33,11 @@ jobs:
     - name: Package Flask app for Lambda
       run: |
         cd app
-        pip install -r requirements.txt -t ./package
-        cp app.py ./package/
+        pip install -r requirements.txt -t package
+        cp app.py package/
+        touch package/__init__.py   # make package a valid module
         cd package
-        zip -r ../../app.zip
+        zip -r ../../app.zip .
     
     - name: Terraform Init
       run: |
