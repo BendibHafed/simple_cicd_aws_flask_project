@@ -29,7 +29,15 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.9.5
-          
+        
+    - name: Package Flask app for Lambda
+      run: |
+        cd app
+        pip install -r requirements.txt -t ./package
+        cp app.py ./package/
+        cd package
+        zip -r ../../app.zip
+    
     - name: Terraform Init
       run: |
         cd terraform
