@@ -1,3 +1,7 @@
+import sys, os
+print("sys.path =", sys.path)
+print("cwd =", os.getcwd())
+
 from app.app import app
 
 
