@@ -2,6 +2,15 @@ provider "aws" {
     region = "eu-west-3"
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"  
+    key            = "flask-app/terraform.tfstate" 
+    region         = "eu-east-3"                  
+    dynamodb_table = "terraform-locks"             
+  }
+}
+
 resource "aws_iam_role" "lambda_role" {
     name = "flask_lambda_role"
 
