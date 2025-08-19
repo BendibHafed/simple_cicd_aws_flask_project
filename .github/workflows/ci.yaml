@@ -37,6 +37,9 @@ jobs:
         name: lambda-package
         path: app.zip
         retention-days: 5
+    
+    - name: Move Lambda Package to Terraform folder
+      run: mv app.zip terraform/
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
