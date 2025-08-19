@@ -66,7 +66,7 @@ The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end wor
 
 ```bash
 terraform output api_url
-https://abc123.execute-api.us-west-2.amazonaws.com
+https://oqq1r4y1tl.execute-api.eu-west-3.amazonaws.com/
 ```
 Visit this URL → you should see: Hello CI/CD
 ![CI/CD Pipeline](assets/cicd_pipeline.png)
