@@ -33,7 +33,7 @@ resource "aws_lambda_function" "flask_app" {
   handler       = "app.lambda_handler"
   runtime       = "python3.11"
   filename      = "app.zip"
-  source_code_hash = filebase64sha256("app.zip")
+  source_code_hash = fileexists("${path.module}/app.zip") ? filebase64sha256("${path.module}/app.zip") : null
 }
 
 # Add execution role for Lambda logs
