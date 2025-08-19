@@ -23,21 +23,14 @@ jobs:
     - name: Run tests
       run: pytest
 
-    - name: Build Lambda Package
+    - name: Build Lambda Package (for validation only)
       working-directory: app
       run: |
         rm -rf package && mkdir package
         pip install -r requirements.txt -t package --no-cache-dir 
         cp *.py package/
         (cd package && zip -r ../../app.zip . -x "*__pycache__*" "tests/*")
-
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: lambda-package
-        path: app.zip
-        retention-days: 5
-    
+   
     - name: Move Lambda Package to Terraform folder
       run: mv app.zip terraform/
 

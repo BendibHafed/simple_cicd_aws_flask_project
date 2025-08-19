@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,20 +37,11 @@ jobs:
           terraform_version: 1.12.2   
       
       # 6. Package Flask app into zip for Lambda
-      - name: Download Artifact (if available)
-        id: download_artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: lambda-package
-          path: .
-        continue-on-error: true
-
-      - name: Rebuild Package (if no artifact)
-        if: steps.download_artifact.outcome != 'success'
+      - name: Rebuild Package
         working-directory: app
         run: |
           rm -rf package && mkdir package
-          pip install -r requirements.txt -t package
+          pip install -r requirements.txt -t package --no-cache-dir
           cp *.py package/
           (cd package && zip -r ../app.zip . -x "*__pycache__*" "tests/*")
 
