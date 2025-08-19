@@ -52,17 +52,7 @@ jobs:
 
     - name: Terraform Init (Local State)
       working-directory: terraform
-      run: |
-        # Create temporary backend config file
-        cat > temp_backend.tf <<EOF
-        terraform {
-          backend "local" {
-            path = "terraform.tfstate"
-          }
-        }
-        EOF
-        
-        terraform init -backend=false
+      run: terraform init -backend=false
 
     - name: Terraform Plan
       working-directory: terraform
