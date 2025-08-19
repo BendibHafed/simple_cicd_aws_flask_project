@@ -62,7 +62,7 @@ jobs:
         }
         EOF
         
-        terraform init -reconfigure
+        terraform init -backend=false
 
     - name: Terraform Plan
       working-directory: terraform
