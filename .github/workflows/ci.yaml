@@ -1,4 +1,4 @@
-name: CI
+name: CI pipeline
 
 on:
   pull_request:
@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -22,14 +23,19 @@ jobs:
     - name: Run tests
       run: pytest
 
-    - name: Package Flask app for Lambda
+    - name: Build Lambda Package
+      working-directory: app
       run: |
-        cd app
-        pip install -r requirements.txt -t package
-        cp app.py package/
-        touch package/__init__.py
-        cd package
-        zip -r ../../app.zip .
+        rm -rf package && mkdir package
+        pip install -r requirements.txt -t package --no-cache-dir 
+        cp *.py package/
+        (cd package && zip -r ../../app.zip . -x "*__pycache__*" "tests/*")
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: lambda-package
+        path: app.zip
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
