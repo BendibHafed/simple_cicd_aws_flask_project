@@ -1,4 +1,4 @@
-name: CI
+name: CI pipeline
 
 on:
   pull_request:
@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -22,19 +23,28 @@ jobs:
     - name: Run tests
       run: pytest
 
-    - name: Package Flask app for Lambda
+    - name: Build Lambda Package
+      working-directory: app
       run: |
-        cd app
-        pip install -r requirements.txt -t package
-        cp app.py package/
-        touch package/__init__.py
-        cd package
-        zip -r ../../app.zip .
+        rm -rf package && mkdir package
+        pip install -r requirements.txt -t package --no-cache-dir 
+        cp *.py package/
+        (cd package && zip -r ../../app.zip . -x "*__pycache__*" "tests/*")
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lambda-package
+        path: app.zip
+        retention-days: 5
+    
+    - name: Move Lambda Package to Terraform folder
+      run: mv app.zip terraform/
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: 1.9.5
+        terraform_version: 1.12.2
 
     - name: Configure AWS credentials.
       uses: aws-actions/configure-aws-credentials@v4
@@ -43,8 +53,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Terraform Init
-      run: cd terraform && terraform init
+    - name: Terraform Init (Local State)
+      working-directory: terraform
+      run: |
+        rm -rf .terraform .terraform.lock.hcl
+        cat > backend_override.tf <<EOF
+        terraform {
+          backend "local" {}
+        }
+        EOF
+        terraform init -reconfigure -input=false -no-color
 
-    - name: Terraform Plan
-      run: cd terraform && terraform plan
+    - name: Terraform Plan (Local State)
+      working-directory: terraform
+      run: terraform plan -input=false -no-color -lock=false
