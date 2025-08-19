@@ -69,3 +69,4 @@ terraform output api_url
 https://abc123.execute-api.us-west-2.amazonaws.com
 
 Visit this URL → you should see: Hello CI/CD
+![CI/CD Pipeline](assets/cicd_pipeline.png)
