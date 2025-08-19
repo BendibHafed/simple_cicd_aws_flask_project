@@ -38,20 +38,21 @@ jobs:
       
       # 6. Package Flask app into zip for Lambda
       - name: Download Artifact (if available)
+        id: download_artifact
         uses: actions/download-artifact@v4
         with:
           name: lambda-package
-          path: app.zip
-        continue-on-error: true  # Allows first-time deploys
-        
+          path: .
+        continue-on-error: true
+
       - name: Rebuild Package (if no artifact)
-        if: ${{ !success() }}  # Only run if download failed
+        if: steps.download_artifact.outcome != 'success'
         working-directory: app
         run: |
           rm -rf package && mkdir package
           pip install -r requirements.txt -t package
           cp *.py package/
-          (cd package && zip -r ../../app.zip . -x "*__pycache__*" "tests/*")
+          (cd package && zip -r ../app.zip . -x "*__pycache__*" "tests/*")
 
       # 7. Configure AWS credentials
       - name: Configure AWS credentials

@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket         = "my-terraform-state-bucket"
+    bucket         = "my-terraform-state-bucket-HE1"
     key            = "flask-app/terraform.tfstate"
     region         = "eu-west-3"  
     encrypt        = true
