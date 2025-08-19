@@ -44,7 +44,9 @@ jobs:
           pip install -r requirements.txt -t package --no-cache-dir
           cp *.py package/
           (cd package && zip -r ../app.zip . -x "*__pycache__*" "tests/*")
-
+      - name: Move Lambda Package to Terraform
+        run: mv app/app.zip terraform/
+        
       # 7. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
