@@ -65,7 +65,7 @@ jobs:
       # 8. Bootstraps S3 + DynamoDB backend if missing
       - name: Ensure Terraform Backend Exists
         run: |
-          BUCKET="my-terraform-state-bucket-HE1"
+          BUCKET="my-terraform-state-bucket-he1"
           REGION=${{ secrets.AWS_REGION }}
           DYNAMO_TABLE="terraform-locks"
           
