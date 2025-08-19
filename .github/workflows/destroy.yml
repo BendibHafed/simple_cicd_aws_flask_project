@@ -1,7 +1,7 @@
 name: Destroy Resources
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
     inputs:
       confirm:
         description: "Type 'destroy' to confirm"
@@ -11,7 +11,7 @@ on:
 jobs:
   destroy:
     runs-on: ubuntu-latest
-    if: github.event.inputs.confirm == 'destroy'  # Double confirmation
+    if: github.event.inputs.confirm == 'destroy'
 
     steps:
       - name: Checkout repo
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.12.2   # use the same version as the CD workflow
+          terraform_version: 1.12.2
         
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,7 +41,7 @@ jobs:
         working-directory: terraform
         run: terraform destroy -auto-approve
         env:
-          TF_WORKSPACE: "default"  # Explicit workspace for safety
+          TF_WORKSPACE: "default" 
 
       # 7. Cleanup (optional)
       - name: Delete Local State

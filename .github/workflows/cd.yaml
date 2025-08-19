@@ -34,7 +34,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.12.2   # keep consistent with destroy.yml
+          terraform_version: 1.12.2   
       
       # 6. Package Flask app into zip for Lambda
       - name: Download Artifact (if available)
