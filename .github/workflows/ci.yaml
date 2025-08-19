@@ -52,8 +52,8 @@ jobs:
 
     - name: Terraform Init (Local State)
       working-directory: terraform
-      run: terraform init -backend=false
+      run: terraform init -backend=false -input=false -no-color
 
     - name: Terraform Plan (Local State)
       working-directory: terraform
-      run: terraform plan -input=false -no-color -lock=false -backend=false
+      run: terraform plan -input=false -no-color -lock=false
