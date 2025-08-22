@@ -5,4 +5,4 @@ def test_hello():
     client = app.test_client()
     response = client.get("/")
     assert response.status_code == 200
-    assert response.data.decode() == "Hello CI/CD!! I am a DevOps eng."
+    assert response.data.decode() == "Hello CI/CD!! I am a DevOps eng !!"

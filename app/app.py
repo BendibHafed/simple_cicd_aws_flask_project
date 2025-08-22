@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello CI/CD!! I am a DevOps eng."
+    return "Hello CI/CD!! I am a DevOps eng !!"
 
 
 def lambda_handler(event, context):
