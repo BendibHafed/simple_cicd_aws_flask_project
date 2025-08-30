@@ -209,3 +209,6 @@ __marimo__/
 
 # terraform ignored file "secrets"
 *.tfvars
+
+# Secrets
+.secrets
