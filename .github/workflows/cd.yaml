@@ -121,7 +121,7 @@ jobs:
       
       # --- Terraform Init (LocalStack) ---
       - name: Terraform Init (LocalStack)
-        if: ${{ env.ACT }}
+        if: ${{ !env.ACT }}
         working-directory: terraform
         run: |
           rm -rf .terraform .terraform.lock.hcl backend_override.tf
