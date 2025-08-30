@@ -1,17 +1,3 @@
-provider "aws" {
-  region = "eu-west-3" 
-}
-
-terraform {
-  backend "s3" {
-    bucket         = "my-terraform-state-bucket-he1"
-    key            = "flask-app/terraform.tfstate"
-    region         = "eu-west-3"  
-    encrypt        = true
-    dynamodb_table = "terraform-locks"
-  }
-}
-
 resource "aws_iam_role" "lambda_role" {
   name = "flask_lambda_role"
 
@@ -28,12 +14,12 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 resource "aws_lambda_function" "flask_app" {
-  function_name = "flask_hello_cicd"
-  role          = aws_iam_role.lambda_role.arn
-  handler       = "app.lambda_handler"
-  runtime       = "python3.11"
-  filename      = "app.zip"
-  source_code_hash = fileexists("${path.module}/app.zip") ? filebase64sha256("${path.module}/app.zip") : null
+  function_name    = "flask_hello_cicd"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "app.lambda_handler"
+  runtime          = "python3.11"
+  filename         = "app.zip"
+  source_code_hash = filebase64sha256("${path.module}/app.zip")
 }
 
 # Add execution role for Lambda logs
@@ -73,8 +59,4 @@ resource "aws_apigatewayv2_stage" "default_stage" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "$default"
   auto_deploy = true
-}
-
-output "api_url" {
-  value = aws_apigatewayv2_stage.default_stage.invoke_url
 }
