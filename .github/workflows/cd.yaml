@@ -81,6 +81,7 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - name: Test AWS credentials
         run: aws sts get-caller-identity
+        
       # 9. Ensure Terraform Backend Exists (AWS uniquement)
       - name: Ensure Terraform Backend Exists
         if: ${{ !env.ACT }}
