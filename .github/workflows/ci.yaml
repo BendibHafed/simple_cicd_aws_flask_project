@@ -9,21 +9,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. Checkout code
     - name: Checkout
       uses: actions/checkout@v4
 
+    # 2. Setup Python
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.11"
 
+    # 3. Install dependencies
     - name: Install dependencies
       run: pip install -r app/requirements.txt
 
+    # 4. Run tests
     - name: Run tests
-      run: pytest app/tests/
+      run: pytest
 
-    - name: Build Lambda Package (for validation only)
+    # 5. Build Lambda Package (for validation only)
+    - name: Build Lambda Package
       working-directory: app
       run: |
         rm -rf package && mkdir package
@@ -31,15 +36,18 @@ jobs:
         cp *.py package/
         (cd package && zip -r ../../app.zip . -x "*__pycache__*" "tests/*")
    
-    - name: Move Lambda Package to Terraform folder
+    # 6. Move Lambda Package to Terraform folder
+    - name: Move Lambda Package
       run: mv app.zip terraform/
 
+    # 7. Setup Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.13.0
-    #  Only configure AWS creds if not running under ACT
-    - name: Configure AWS credentials.
+
+    # 8. Configure AWS credentials (only if not ACT)
+    - name: Configure AWS credentials
       if: ${{ !env.ACT }}
       uses: aws-actions/configure-aws-credentials@v4
       with:
@@ -47,13 +55,14 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
     
+    # 9. Setup Terraform Plugin Cache (only if not ACT)
     - name: Setup Terraform Plugin Cache
       if: ${{ !env.ACT }}
       run: |
         mkdir -p ~/.terraform.d/plugin-cache
-        echo 'plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformr
+        echo 'plugin_cache_dir = "$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
 
-        
+    # 10. Terraform Init (Local State for CI)
     - name: Terraform Init (Local State)
       working-directory: terraform
       run: |
@@ -65,14 +74,17 @@ jobs:
         EOF
         terraform init -reconfigure -input=false -no-color
            
+    # 11. Terraform Format Check
     - name: Terraform Format Check
       working-directory: terraform
       run: terraform fmt -check -recursive
       
+    # 12. Terraform Validate
     - name: Terraform Validate
       working-directory: terraform
       run: terraform validate -no-color
 
+    # 13. Terraform Plan (Local State / LocalStack)
     - name: Terraform Plan (Local State)
       working-directory: terraform
       run: |
