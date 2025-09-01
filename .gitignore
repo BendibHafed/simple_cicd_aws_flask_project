@@ -208,9 +208,10 @@ marimo/_lsp/
 __marimo__/
 
 
-# terraform ignored file "secrets"
+# terraform && terraform ignored file "secrets"
 *.tfvars
 .terraform/
+*.tfstate
 
 # Secrets
 .secrets

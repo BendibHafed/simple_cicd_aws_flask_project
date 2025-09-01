@@ -2,8 +2,7 @@ name: CD pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build-test-deploy:
@@ -29,9 +28,8 @@ jobs:
         working-directory: app
         run: pytest
 
-      # 4. Install AWS CLI (GitHub Actions seulement)
+      # 4. Install and/or Update AWS CLI
       - name: Install AWS CLI
-        if: ${{ !env.ACT }}
         run: |
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
@@ -54,7 +52,7 @@ jobs:
           mkdir -p ../terraform
           (cd package && zip -r ../../terraform/app.zip . -x "*__pycache__*" "tests/*")
 
-      # 7. LocalStack setup (si ACT=true)
+      # 7. LocalStack setup (if ACT=true)
       - name: Start LocalStack
         if: ${{ env.ACT }}
         run: |
@@ -69,7 +67,7 @@ jobs:
           echo "TF_VAR_use_localstack=true" >> $GITHUB_ENV
           echo "TF_VAR_aws_access_key=test" >> $GITHUB_ENV
           echo "TF_VAR_aws_secret_key=test" >> $GITHUB_ENV
-          echo "TF_VAR_aws_region=us-east-1" >> $GITHUB_ENV
+          echo "TF_VAR_aws_region= ${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
 
       # 8. Configure AWS credentials (GitHub Actions)
       - name: Configure AWS credentials
@@ -79,8 +77,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Test AWS credentials
+        if: ${{ !env.ACT }}
         run: aws sts get-caller-identity
+
       # 9. Ensure Terraform Backend Exists (AWS uniquement)
       - name: Ensure Terraform Backend Exists
         if: ${{ !env.ACT }}
@@ -109,7 +110,7 @@ jobs:
           fi
 
       # 10. Terraform Init (LocalStack)
-      - name: Terraform Init (LocalStack)
+      - name: Terraform Init (Local State)
         if: ${{ env.ACT }}
         working-directory: terraform
         run: |
@@ -121,26 +122,13 @@ jobs:
             }
           }
           EOF
-          terraform init -reconfigure
+          terraform init -reconfigure -input=false -no-color
 
       # 11. Terraform Init (AWS real S3 backend)
       - name: Terraform Init (AWS)
         if: ${{ !env.ACT }}
         working-directory: terraform
-        run: |
-          rm -rf .terraform .terraform.lock.hcl backend_override.tf
-          cat > backend_override.tf <<EOF
-          terraform {
-            backend "s3" {
-              bucket         = "my-terraform-state-bucket-he1"
-              key            = "flask-app/terraform.tfstate"
-              region         = "eu-west-3"
-              encrypt        = true
-              dynamodb_table = "terraform-locks"
-            }
-          }
-          EOF
-          terraform init -reconfigure
+        run: terraform init -reconfigure -input=false
 
       # 12. Terraform Apply (AWS uniquement)
       - name: Terraform Apply
