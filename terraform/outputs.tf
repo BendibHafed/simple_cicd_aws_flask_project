@@ -1,6 +1,6 @@
 output "api_gateway_url" {
-  description = "Invoke URL for the API Gateway"
-  value       = aws_apigatewayv2_api.http_api.api_endpoint
+  description = "Invoke URL for the API Gateway."
+  value       = aws_apigatewayv2_stage.default_stage.invoke_url
 }
 
 output "lambda_function_name" {
