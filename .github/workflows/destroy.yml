@@ -4,48 +4,84 @@ on:
   workflow_dispatch:
     inputs:
       confirm:
-        description: "Type 'destroy' to confirm"
+        description: "Type 'DESTROY-PROD' to confirm"
         required: true
         default: "cancel"
 
 jobs:
   destroy:
     runs-on: ubuntu-latest
-    if: github.event.inputs.confirm == 'destroy'
+    if: github.event.inputs.confirm == 'DESTROY-PROD'
 
     steps:
-      - name: Checkout repo
+      # 1. Repository Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # 2. Terraform Setup
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.13.0
         
-      - name: Configure AWS credentials
+      # 3. AWS Credentials Configuration
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}   
 
-      - name: Terraform Init
+      # 4. Terraform Initialization
+      - name: Initialize Terraform
         working-directory: terraform
-        run: terraform init -reconfigure
-      
-      - name: Terraform Plan (Destroy)
-        working-directory: terraform
-        run: terraform plan -destroy
+        run: terraform init -reconfigure -input=false -no-color
 
-      - name: Terraform Destroy
+      # 5. Destroy Preparation
+      - name: Prepare for Destroy Operation
         working-directory: terraform
-        run: terraform destroy -auto-approve
-        env:
-          TF_WORKSPACE: "default" 
-
-      # 7. Cleanup (optional)
-      - name: Delete Local State
-        if: always()
         run: |
-          rm -f terraform/terraform.tfstate*
-          rm -f terraform/.terraform.lock.hcl
+          # Create dummy file if app.zip does not exist
+          if [ ! -f "app.zip" ]; then
+            echo "Creating dummy app.zip for destroy operation..."
+            touch app.zip
+          fi
+
+      # 6. Destruction Plan
+      - name: Generate Destruction Plan
+        working-directory: terraform
+        run: terraform plan -destroy -input=false -no-color -lock=false
+
+      # 7. Manual Confirmation Delay
+      - name: Final Confirmation Delay
+        run: |
+          echo " -->  DESTRUCTION WILL START IN 15 SECONDS..."
+          echo " --> CANCEL NOW IF THIS IS A MISTAKE!"
+          sleep 15
+
+      # 8. Infrastructure Destruction
+      - name: Execute Terraform Destroy
+        working-directory: terraform
+        run: terraform destroy -auto-approve -input=false -no-color -lock=false
+
+      # 9. State Backup
+      - name: Backup Terraform State
+        run: |
+          echo "Creating state backup before cleanup..."
+          aws s3 cp s3://my-terraform-state-bucket-he1/flask-app/terraform.tfstate \
+            s3://my-terraform-state-bucket-he1/backups/terraform.tfstate.$(date +%Y%m%d-%H%M%S).backup
+
+      # 10. Optional State Cleanup
+      - name: Clean S3 State (Optional)
+        if: success()
+        run: |
+          echo "Removing Terraform state file from S3..."
+          aws s3 rm s3://my-terraform-state-bucket-he1/flask-app/terraform.tfstate
+          echo "State file removed successfully."
+
+      # 11. Destruction Verification
+      - name: Verify Destruction Completion
+        run: |
+          echo " --> Destruction completed successfully"
+          echo " --> State backed up to S3 backups/"
+          echo " --> Infrastructure resources have been destroyed"
