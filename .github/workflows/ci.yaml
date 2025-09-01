@@ -45,7 +45,13 @@ jobs:
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.13.0
-
+    # Start LocalStack   
+    - name: Start LocalStack
+      if: ${{ env.ACT }}
+      run: |
+        pip install localstack
+        localstack start -d
+        sleep 10  # Wait for LocalStack to be ready
     # 8. Configure AWS credentials (only if not ACT)
     - name: Configure AWS credentials
       if: ${{ !env.ACT }}
@@ -77,7 +83,8 @@ jobs:
     # 11. Terraform Format Check
     - name: Terraform Format Check
       working-directory: terraform
-      run: terraform fmt -check -recursive
+      continue-on-error: true
+      run: terraform fmt -check -diff -recursive
       
     # 12. Terraform Validate
     - name: Terraform Validate

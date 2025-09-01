@@ -1,4 +1,10 @@
 # --- Variables of AWS/LocalStack ---
+variable "use_localstack" {
+  description = "True if we deploy on LocalStack, False if on AWS"
+  type        = bool
+  default     = false
+}
+
 variable "aws_region" {
   description = "AWS Region"
   type        = string
@@ -8,17 +14,13 @@ variable "aws_region" {
 variable "aws_access_key" {
   description = "AWS Access Key (mocked if LocalStack)"
   type        = string
-  default     = "test"
+  default     = ""
+  sensitive   = true
 }
 
 variable "aws_secret_key" {
   description = "AWS Secret Key (mocked of LocalStack)"
   type        = string
-  default     = "test"
-}
-
-variable "use_localstack" {
-  description = "True if we deploy on LocalStack, False if on AWS"
-  type        = bool
-  default     = false
+  default     = ""
+  sensitive   = true
 }
