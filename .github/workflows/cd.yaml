@@ -130,7 +130,7 @@ jobs:
         working-directory: terraform
         run: terraform init -reconfigure -input=false
 
-      # 12. Terraform Apply (AWS uniquement)
+      # 12. Terraform Apply (AWS)
       - name: Terraform Apply
         if: ${{ !env.ACT }}
         working-directory: terraform

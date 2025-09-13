@@ -59,25 +59,25 @@ jobs:
           echo " --> CANCEL NOW IF THIS IS A MISTAKE!"
           sleep 15
 
-      # 8. Infrastructure Destruction
-      - name: Execute Terraform Destroy
-        working-directory: terraform
-        run: terraform destroy -auto-approve -input=false -no-color -lock=false
-
-      # 9. State Backup
+      # 8. State Backup
       - name: Backup Terraform State
         run: |
           echo "Creating state backup before cleanup..."
           aws s3 cp s3://my-terraform-state-bucket-he1/flask-app/terraform.tfstate \
-            s3://my-terraform-state-bucket-he1/backups/terraform.tfstate.$(date +%Y%m%d-%H%M%S).backup
+            s3://my-terraform-state-bucket-he1/backups/flask-app/terraform.tfstate.$(date +%Y%m%d-%H%M%S).backup
 
-      # 10. Optional State Cleanup
-      - name: Clean S3 State (Optional)
-        if: success()
-        run: |
-          echo "Removing Terraform state file from S3..."
-          aws s3 rm s3://my-terraform-state-bucket-he1/flask-app/terraform.tfstate
-          echo "State file removed successfully."
+      # 9. Infrastructure Destruction
+      - name: Execute Terraform Destroy
+        working-directory: terraform
+        run: terraform destroy -auto-approve -input=false -no-color -lock=false
+
+      # # 10. Optional State Cleanup
+      # - name: Clean S3 State (Optional)
+      #   if: success()
+      #   run: |
+      #     echo "Removing Terraform state file from S3..."
+      #     aws s3 rm s3://my-terraform-state-bucket-he1/flask-app/terraform.tfstate
+      #     echo "State file removed successfully."
 
       # 11. Destruction Verification
       - name: Verify Destruction Completion

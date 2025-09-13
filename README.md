@@ -1,21 +1,42 @@
-# Serverless Flask App with Terraform + GitHub Actions CI/CD
+# Serverless Flask App with Terraform + GitHub Actions CI/CD + LocalStack
 
-This project demonstrates a **simple AWS Lambda + API Gateway** setup, managed with **Terraform**, and deployed through a **GitHub Actions CI/CD pipeline**.  
-The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end workflow for infrastructure as code and automated deployments.
+This project demonstrates a production-ready **AWS Lambda + API Gateway** setup, managed with **Terraform**, featuring **LocalStack** for local development and deployed through an advanced **GitHub Actions CI/CD pipeline**.  
+The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end workflow for infrastructure as code, local simulation, and automated cloud deployments.
 
 ---
 
-##  Project Structure
+## ✨ Features
+
+- **Infrastructure as Code** — complete AWS stack defined in Terraform  
+- **Dual CI/CD** — run locally with `act` + LocalStack **and** remotely on GitHub Actions  
+- **Local Development** — no AWS account required thanks to LocalStack  
+- **Security** — IAM roles, encrypted remote state, proper secret management  
+- **State Management** — S3 backend + DynamoDB locking for team collaboration  
+- **Testing** — Pytest integrated and executed in CI/CD
+
+---
+
+## 📁 Project Structure
+
+```text
 .
-├── app/ # Flask app source code
-│ ├── app.py # Lambda handler
-│ └── requirements.txt # Python dependencies
-├── terraform/ # Terraform IaC for Lambda + API Gateway
-│ └── main.tf
-├── .github/workflows/ # CI/CD workflows
-│ ├── ci.yaml # Runs tests + terraform plan (local backend)
-│ ├── cd.yaml # Deploys to AWS (S3 + DynamoDB backend)
-│ └── destroy.yaml # Manual destroy workflow
+├── app/                          # Flask application
+│   ├── app.py                    # Lambda handler function
+│   ├── requirements.txt          # Python dependencies
+│   └── tests/                    # Unit tests (pytest)
+├── terraform/                    # Infrastructure as Code (Terraform)
+│   ├── main.tf                   # Lambda, API Gateway, IAM, permissions
+│   ├── provider.tf               # AWS provider (with LocalStack endpoints)
+│   ├── backend.tf                # Remote backend (S3 + DynamoDB)
+│   ├── variables.tf              # Input variables
+│   ├── versions.tf               # Provider & Terraform version constraints
+│   └── outputs.tf                # Outputs (API URL, Lambda ARN/name)
+├── .github/workflows/            # CI/CD workflows
+│   ├── ci.yaml                   # CI: tests + validation + plan (Local/LocalStack)
+│   ├── cd.yaml                   # CD: deploy to AWS (S3 backend)
+│   └── destroy.yaml              # Manual destroy
+├── assets/
+│   └── cicd_pipeline.png         # (Optional) pipeline diagram/screenshot
 └── README.md
 
 
@@ -24,10 +45,16 @@ The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end wor
 ## Workflows
 
 ### 🔹 Continuous Integration (CI) – `.github/workflows/ci.yaml`
-- Runs on **pull requests** to `main`.
-- Installs dependencies and runs **pytest**.
-- Builds a Lambda deployment package (`app.zip`).
-- Runs `terraform plan` with a **local backend** (no AWS state).
+Runs on pull requests to main.
+
+-Install Python deps
+- Run pytest
+- Build Lambda package (app.zip)
+- terraform fmt (check)
+- terraform validate
+- terraform plan with local backend
+ * With act locally → uses LocalStack (no AWS creds)
+ * On GitHub → uses real AWS creds (from GitHub Secrets)
 
 ### 🔹 Continuous Deployment (CD) – `.github/workflows/cd.yaml`
 - Runs on **push to `main`**.
@@ -43,7 +70,7 @@ The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end wor
 ### 🔹 Destroy Workflow – `.github/workflows/destroy.yaml`
 - Triggered manually (`workflow_dispatch`).
 - Runs `terraform destroy` to remove all AWS resources.
-- Cleans up local state files.
+- Cleans up local state files (if needed), but first you have to create a backup tfstate.
 
 ---
 
