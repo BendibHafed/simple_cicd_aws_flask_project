@@ -5,7 +5,7 @@ The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end wor
 
 ---
 
-## ✨ Features
+## Features
 
 - **Infrastructure as Code** — complete AWS stack defined in Terraform  
 - **Dual CI/CD** — run locally with `act` + LocalStack **and** remotely on GitHub Actions  
@@ -16,7 +16,7 @@ The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end wor
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 .
