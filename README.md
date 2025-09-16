@@ -3,6 +3,8 @@
 This project demonstrates a production-ready **AWS Lambda + API Gateway** setup, managed with **Terraform**, featuring **LocalStack** for local development and deployed through an advanced **GitHub Actions CI/CD pipeline**.  
 The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end workflow for infrastructure as code, local simulation, and automated cloud deployments.
 
+### - Solution
+![arch](./assets/arch1.png)
 ---
 
 ## Features
@@ -38,7 +40,7 @@ The Lambda returns a basic `"Hello CI/CD"` message, showcasing an end-to-end wor
 ├── assets/
 │   └── cicd_pipeline.png         # (Optional) pipeline diagram/screenshot
 └── README.md
-
+```
 
 ---
 
